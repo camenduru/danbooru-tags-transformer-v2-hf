@@ -129,6 +129,14 @@ def image_generation_config_ui():
     ]
 
 
+def description_ui():
+    gr.Markdown(
+        """
+        # Danbooru Tags Transformer V2 Demo
+        """
+    )
+
+
 def main():
 
     v2 = V2UI()
@@ -138,6 +146,8 @@ def main():
     print("Loaded.")
 
     with gr.Blocks() as ui:
+        description_ui()
+
         with gr.Row():
             with gr.Column():
                 v2.ui()
@@ -161,6 +171,41 @@ def main():
                     preview=True,
                     show_label=False,
                     visible=True,
+                )
+
+                gr.Examples(
+                    examples=[
+                        ["original", "", "1girl, solo", "832x1216"],
+                        ["original", "", "3girls, 2boys", "1536x640"],
+                        [
+                            "sousou no frieren",
+                            "frieren (sousou no frieren)",
+                            "1girl, solo",
+                            "832x1216",
+                        ],
+                        [
+                            "honkai: star rail",
+                            "silver wolf (honkai: star rail)",
+                            "1girl, solo",
+                            "832x1216",
+                        ],
+                        [
+                            "bocchi the rock!",
+                            "gotoh hitori, kita ikuyo, ijichi nijika, yamada ryo",
+                            "4girls, multiple girls",
+                            "1216x832",
+                        ],
+                        [
+                            "chuunibyou demo koi ga shitai!",
+                            "takanashi rikka",
+                            "1girl, solo",
+                            "640x1536",
+                        ],
+                    ],
+                    inputs=[
+                        *v2.get_inputs()[1:4],
+                        image_generation_config_components[0],  # image size
+                    ],
                 )
 
         v2.get_generate_btn().click(
