@@ -223,7 +223,7 @@ class V2UI:
             value="long",
         )
         input_identity = gr.Radio(
-            label="Identity",
+            label="Keep identity level",
             choices=list(IDENTITY_OPTIONS.keys()),
             value="lax",
         )
