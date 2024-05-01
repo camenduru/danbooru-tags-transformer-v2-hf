@@ -1,8 +1,8 @@
 ---
 title: Danbooru Tags Transformer V2
-emoji: 🐢
-colorFrom: purple
-colorTo: pink
+emoji: 📦
+colorFrom: yellow
+colorTo: yellow
 sdk: gradio
 sdk_version: 4.28.3
 app_file: app.py
