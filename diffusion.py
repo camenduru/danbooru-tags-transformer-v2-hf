@@ -31,11 +31,9 @@ class ImageGenerator:
             use_safetensors=True,
             add_watermarker=False,
         )
-        self.pipe.bad_punct_regexscheduler = (
-            EulerAncestralDiscreteScheduler.from_pretrained(
-                model_name,
-                subfolder="scheduler",
-            )
+        self.pipe.scheduler = EulerAncestralDiscreteScheduler.from_pretrained(
+            model_name,
+            subfolder="scheduler",
         )
 
         # xformers
@@ -68,4 +66,4 @@ class ImageGenerator:
             width=width,
             num_inference_steps=num_inference_steps,
             guidance_scale=guidance_scale,
-        ).images[0]
+        ).images
