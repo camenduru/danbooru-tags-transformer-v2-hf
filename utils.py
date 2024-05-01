@@ -9,16 +9,16 @@ NEGATIVE_PROMPT = {
 
 IMAGE_SIZE_OPTIONS = {
     "1536x640": "<|aspect_ratio:ultra_wide|>",
-    "1216x832": "<|aspect_ratio:wide|>",
+    "1344x768": "<|aspect_ratio:wide|>",
     "1024x1024": "<|aspect_ratio:square|>",
-    "832x1216": "<|aspect_ratio:tall|>",
+    "768x1344": "<|aspect_ratio:tall|>",
     "640x1536": "<|aspect_ratio:ultra_tall|>",
 }
 IMAGE_SIZES = {
     "1536x640": (1536, 640),
-    "1216x832": (1216, 832),
+    "1344x768": (1344, 768),
     "1024x1024": (1024, 1024),
-    "832x1216": (832, 1216),
+    "768x1344": (768, 1344),
     "640x1536": (640, 1536),
 }
 
