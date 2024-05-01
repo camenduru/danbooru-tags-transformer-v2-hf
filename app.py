@@ -175,36 +175,65 @@ def main():
 
                 gr.Examples(
                     examples=[
-                        ["original", "", "1girl, solo", "768x1344"],
-                        ["original", "", "3girls, 2boys", "1344x768"],
-                        ["", "", "no humans, scenery, spring (season)", "1536x640"],
+                        [
+                            "original",
+                            "",
+                            "1girl, solo, blue theme, limited palette",
+                            "lax",
+                            "long",
+                            "1536x640",
+                        ],
+                        [
+                            "",
+                            "",
+                            "4girls",
+                            "none",
+                            "very_long",
+                            "768x1344",
+                        ],
+                        [
+                            "",
+                            "",
+                            "no humans, scenery, spring (season)",
+                            "none",
+                            "medium",
+                            "1536x640",
+                        ],
                         [
                             "sousou no frieren",
-                            "frieren (sousou no frieren)",
+                            "frieren",
                             "1girl, solo",
+                            "none",
+                            "long",
                             "768x1344",
                         ],
                         [
                             "honkai: star rail",
                             "silver wolf (honkai: star rail)",
-                            "1girl, solo",
+                            "1girl, solo, annoyed",
+                            "none",
+                            "long",
                             "768x1344",
                         ],
                         [
                             "bocchi the rock!",
                             "gotoh hitori, kita ikuyo, ijichi nijika, yamada ryo",
                             "4girls, multiple girls",
+                            "none",
+                            "very_long",
                             "1344x768",
                         ],
                         [
                             "chuunibyou demo koi ga shitai!",
                             "takanashi rikka",
                             "1girl, solo",
+                            "none",
+                            "long",
                             "640x1536",
                         ],
                     ],
                     inputs=[
-                        *v2.get_inputs()[1:4],
+                        *v2.get_inputs()[1:6],
                         image_generation_config_components[0],  # image size
                     ],
                 )
