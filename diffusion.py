@@ -1,12 +1,14 @@
 from PIL import Image
 
 import torch
+
 from diffusers.pipelines.stable_diffusion_xl.pipeline_stable_diffusion_xl import (
     StableDiffusionXLPipeline,
 )
 from diffusers.schedulers.scheduling_euler_ancestral_discrete import (
     EulerAncestralDiscreteScheduler,
 )
+from diffusers.models.attention_processor import AttnProcessor2_0
 
 try:
     import spaces
@@ -27,9 +29,9 @@ class ImageGenerator:
         self.pipe = StableDiffusionXLPipeline.from_pretrained(
             model_name,
             torch_dtype=torch.float16,
-            custom_pipeline="lpw_stable_diffusion_xl",
             use_safetensors=True,
             add_watermarker=False,
+            custom_pipeline="lpw_stable_diffusion_xl",
         )
         self.pipe.scheduler = EulerAncestralDiscreteScheduler.from_pretrained(
             model_name,
@@ -37,7 +39,13 @@ class ImageGenerator:
         )
 
         # xformers
-        self.pipe.enable_xformers_memory_efficient_attention()
+        # self.pipe.enable_xformers_memory_efficient_attention()
+        self.pipe.unet.set_attn_processor(AttnProcessor2_0())
+
+        try:
+            self.pipe = torch.compile(self.pipe)
+        except Exception as e:
+            print("torch.compile is not supported on this system")
 
         self.pipe.to("cuda")
 
