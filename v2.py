@@ -55,7 +55,7 @@ def normalize_tags(tokenizer: PreTrainedTokenizerBase, tags: str):
             [
                 token
                 for token in tokenizer.encode_plus(
-                    tags,
+                    tags.strip(),
                     return_tensors="pt",
                 ).input_ids[0]
                 if int(token) != tokenizer.unk_token_id
