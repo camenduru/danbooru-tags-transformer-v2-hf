@@ -38,16 +38,15 @@ class ImageGenerator:
             subfolder="scheduler",
         )
 
-        # xformers
-        # self.pipe.enable_xformers_memory_efficient_attention()
+        # sdpa
         self.pipe.unet.set_attn_processor(AttnProcessor2_0())
+
+        self.pipe.to("cuda")
 
         try:
             self.pipe = torch.compile(self.pipe)
         except Exception as e:
             print("torch.compile is not supported on this system")
-
-        self.pipe.to("cuda")
 
     @torch.no_grad()
     @spaces.GPU(duration=30)
