@@ -206,7 +206,7 @@ class V2UI:
         input_identity = gr.Radio(
             label="Keep identity level",
             choices=list(IDENTITY_OPTIONS.keys()),
-            value="lax",
+            value="none",
         )
 
         model_name = gr.Dropdown(
