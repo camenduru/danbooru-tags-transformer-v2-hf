@@ -2,6 +2,9 @@ ARG HF_TOKEN
 
 FROM python:3.10-bullseye
 
+# Install rust
+RUN apt-get update && apt-get install -y curl
+
 RUN useradd -m -u 1000 user
 USER user
 
@@ -9,11 +12,8 @@ USER user
 ENV HOME=/home/user \
     PATH=/home/user/.local/bin:$PATH
 
-# Install rust
-RUN apt-get update && apt-get install -y curl
-
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-ENV PATH="/root/.cargo/bin:${PATH}"
+ENV PATH="$HOME/.cargo/bin:${PATH}"
 
 # Set the working directory to the user's home directory
 WORKDIR $HOME/app
