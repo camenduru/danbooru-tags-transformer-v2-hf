@@ -3,8 +3,8 @@ title: Danbooru Tags Transformer V2
 emoji: 📦
 colorFrom: yellow
 colorTo: yellow
-sdk: gradio
-sdk_version: 4.28.3
+sdk: docker
+app_port: 7860
 app_file: app.py
 pinned: false
 license: apache-2.0
