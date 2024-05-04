@@ -22,6 +22,9 @@ except ImportError:
 from utils import NEGATIVE_PROMPT
 
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+
 class ImageGenerator:
     pipe: StableDiffusionXLPipeline
 
@@ -41,7 +44,7 @@ class ImageGenerator:
         # sdpa
         self.pipe.unet.set_attn_processor(AttnProcessor2_0())
 
-        self.pipe.to("cuda")
+        self.pipe.to(device)
 
         try:
             self.pipe = torch.compile(self.pipe)

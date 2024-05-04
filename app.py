@@ -6,17 +6,28 @@ import gradio as gr
 from v2 import V2UI
 from diffusion import ImageGenerator
 from output import UpsamplingOutput
-from utils import QUALITY_TAGS, NEGATIVE_PROMPT, IMAGE_SIZE_OPTIONS, IMAGE_SIZES
+from utils import QUALITY_TAGS, NEGATIVE_PROMPT, IMAGE_SIZE_OPTIONS, PEOPLE_TAGS
 
 
 def animagine_xl_v3_1(output: UpsamplingOutput):
+    # separate people tags (e.g. 1girl)
+    people_tags = []
+    other_general_tags = []
+    for tag in output.general_tags.split(","):
+        tag = tag.strip()
+        if tag in PEOPLE_TAGS:
+            people_tags.append(tag)
+        else:
+            other_general_tags.append(tag)
+
     return ", ".join(
         [
             part.strip()
             for part in [
+                *people_tags,
                 output.character_tags,
                 output.copyright_tags,
-                output.general_tags,
+                *other_general_tags,
                 output.upsampled_tags,
                 (
                     output.rating_tag
@@ -35,59 +46,29 @@ def elapsed_time_format(elapsed_time: float) -> str:
 
 def parse_upsampling_output(
     upsampler: Callable[..., UpsamplingOutput],
-    image_generator: Callable[..., Image.Image],
 ):
-    def _parse_upsampling_output(
-        generate_image: bool, *args
-    ) -> tuple[str, str, Image.Image | None]:
+    def _parse_upsampling_output(*args) -> tuple[
+        str,
+        str,
+        dict,
+    ]:
         output = upsampler(*args)
 
         print(output)
 
-        if not generate_image:
-            return (
-                animagine_xl_v3_1(output),
-                elapsed_time_format(output.elapsed_time),
-                None,
-            )
-
-        # generate image
-        [
-            image_size_option,
-            quality_tags,
-            negative_prompt,
-            num_inference_steps,
-            guidance_scale,
-        ] = args[
-            7:
-        ]  # remove the first 7 arguments for upsampler
-        width, height = IMAGE_SIZES[image_size_option]
-        image = image_generator(
-            ", ".join([animagine_xl_v3_1(output), quality_tags]),
-            negative_prompt,
-            height,
-            width,
-            num_inference_steps,
-            guidance_scale,
-        )
-
         return (
             animagine_xl_v3_1(output),
             elapsed_time_format(output.elapsed_time),
-            image,
+            gr.update(
+                interactive=True,
+            ),
         )
 
     return _parse_upsampling_output
 
 
-def toggle_visible_output_image(generate_image: bool):
-    return gr.update(
-        visible=generate_image,
-    )
-
-
 def image_generation_config_ui():
-    with gr.Accordion(label="Image generation config", open=True) as accordion:
+    with gr.Accordion(label="Image generation config", open=False) as accordion:
         image_size = gr.Radio(
             label="Image size",
             choices=list(IMAGE_SIZE_OPTIONS.keys()),
@@ -142,7 +123,7 @@ def main():
     v2 = V2UI()
 
     print("Loading diffusion model...")
-    image_generator = ImageGenerator()
+    # image_generator = ImageGenerator()
     print("Loaded.")
 
     with gr.Blocks() as ui:
@@ -152,25 +133,25 @@ def main():
             with gr.Column():
                 v2.ui()
 
-                generate_image_check = gr.Checkbox(
-                    label="Also generate image", value=True
+            with gr.Column():
+                output_text = gr.TextArea(label="Output tags", interactive=False)
+
+                elapsed_time_md = gr.Markdown(label="Elapsed time", value="")
+
+                generate_image_btn = gr.Button(
+                    value="Generate image with this prompt!",
                 )
 
                 accordion, image_generation_config_components = (
                     image_generation_config_ui()
                 )
 
-            with gr.Column():
-                output_text = gr.TextArea(label="Output tags", interactive=False)
-
-                elapsed_time_md = gr.Markdown(label="Elapsed time", value="")
-
                 output_image = gr.Gallery(
                     label="Output image",
                     columns=1,
                     preview=True,
                     show_label=False,
-                    visible=True,
+                    visible=False,
                 )
 
                 gr.Examples(
@@ -179,78 +160,86 @@ def main():
                             "original",
                             "",
                             "1girl, solo, blue theme, limited palette",
-                            "lax",
+                            "sfw",
+                            "ultra_wide",
                             "long",
-                            "1536x640",
+                            "lax",
                         ],
                         [
                             "",
                             "",
                             "4girls",
-                            "none",
+                            "sfw",
+                            "tall",
                             "very_long",
-                            "768x1344",
+                            "lax",
+                        ],
+                        [
+                            "original",
+                            "",
+                            "1girl, solo, upper body, looking at viewer, profile picture",
+                            "sfw",
+                            "square",
+                            "medium",
+                            "none",
                         ],
                         [
                             "",
                             "",
                             "no humans, scenery, spring (season)",
-                            "none",
+                            "general",
+                            "ultra_wide",
                             "medium",
-                            "1536x640",
+                            "lax",
                         ],
                         [
                             "sousou no frieren",
                             "frieren",
                             "1girl, solo",
-                            "none",
+                            "general",
+                            "tall",
                             "long",
-                            "768x1344",
+                            "lax",
                         ],
                         [
                             "honkai: star rail",
                             "silver wolf (honkai: star rail)",
                             "1girl, solo, annoyed",
-                            "none",
+                            "sfw",
+                            "tall",
                             "long",
-                            "768x1344",
+                            "lax",
                         ],
                         [
                             "bocchi the rock!",
                             "gotoh hitori, kita ikuyo, ijichi nijika, yamada ryo",
                             "4girls, multiple girls",
-                            "none",
+                            "sfw",
+                            "ultra_wide",
                             "very_long",
-                            "1344x768",
+                            "lax",
                         ],
                         [
                             "chuunibyou demo koi ga shitai!",
                             "takanashi rikka",
                             "1girl, solo",
-                            "none",
+                            "sfw",
+                            "ultra_tall",
                             "long",
-                            "640x1536",
+                            "lax",
                         ],
                     ],
                     inputs=[
-                        *v2.get_inputs()[1:6],
-                        image_generation_config_components[0],  # image size
+                        *v2.get_inputs()[1:8],
                     ],
                 )
 
         v2.get_generate_btn().click(
-            parse_upsampling_output(v2.on_generate, image_generator.generate),
+            parse_upsampling_output(v2.on_generate),
             inputs=[
-                generate_image_check,
                 *v2.get_inputs(),
-                *image_generation_config_components,
             ],
-            outputs=[output_text, elapsed_time_md, output_image],
-        )
-        generate_image_check.change(
-            toggle_visible_output_image,
-            inputs=[generate_image_check],
-            outputs=[output_image],
+            outputs=[output_text, elapsed_time_md, generate_image_btn],
         )
 
     ui.launch()

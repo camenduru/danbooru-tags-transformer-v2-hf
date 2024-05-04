@@ -22,6 +22,13 @@ IMAGE_SIZES = {
     "640x1536": (640, 1536),
 }
 
+ASPECT_RATIO_OPTIONS = {
+    "ultra_wide": "<|aspect_ratio:ultra_wide|>",
+    "wide": "<|aspect_ratio:wide|>",
+    "square": "<|aspect_ratio:square|>",
+    "tall": "<|aspect_ratio:tall|>",
+    "ultra_tall": "<|aspect_ratio:ultra_tall|>",
+}
 RATING_OPTIONS = {
     "sfw": "<|rating:sfw|>",
     "general": "<|rating:general|>",
@@ -42,3 +49,11 @@ IDENTITY_OPTIONS = {
     "lax": "<|identity:lax|>",
     "strict": "<|identity:strict|>",
 }
+
+
+PEOPLE_TAGS = [
+    *[f"1{x}" for x in ["girl", "boy", "other"]],
+    *[f"{i}girls" for i in range(2, 6)],
+    *[f"6+{x}s" for x in ["girl", "boy", "other"]],
+    "no humans",
+]

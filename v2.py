@@ -1,7 +1,11 @@
 import time
 
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, PreTrainedTokenizerBase
+
+from dartrs.v2 import V2Model, MixtralModel
+from dartrs.dartrs import DartTokenizer
+from dartrs.utils import get_generation_config
+
 
 import gradio as gr
 from gradio.components import Component
@@ -16,31 +20,26 @@ except ImportError:
 
 
 from output import UpsamplingOutput
-from utils import IMAGE_SIZE_OPTIONS, RATING_OPTIONS, LENGTH_OPTIONS, IDENTITY_OPTIONS
+from utils import ASPECT_RATIO_OPTIONS, RATING_OPTIONS, LENGTH_OPTIONS, IDENTITY_OPTIONS
 
 ALL_MODELS = {
-    "dart-v2-llama-100m-sft": {
-        "repo": "p1atdev/dart-v2-llama-100m-sft",
+    "dart-v2-mixtral-160m-sft-6": {
+        "repo": "p1atdev/dart-v2-mixtral-160m-sft-6",
         "type": "sft",
+        "class": MixtralModel,
     },
-    "dart-v2-mistral-100m-sft": {
-        "repo": "p1atdev/dart-v2-mistral-100m-sft",
+    "dart-v2-mixtral-160m-sft-8": {
+        "repo": "p1atdev/dart-v2-mixtral-160m-sft-8",
         "type": "sft",
-    },
-    "dart-v2-mixtral-160m-sft": {
-        "repo": "p1atdev/dart-v2-mixtral-160m-sft",
-        "type": "sft",
+        "class": MixtralModel,
     },
 }
 
 
-def prepare_models(model_name: str):
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForCausalLM.from_pretrained(
-        model_name,
-        torch_dtype=torch.bfloat16,
-        device_map="auto",
-    )
+def prepare_models(model_config: dict):
+    model_name = model_config["repo"]
+    tokenizer = DartTokenizer.from_pretrained(model_name)
+    model = model_config["class"].from_pretrained(model_name)
 
     return {
         "tokenizer": tokenizer,
@@ -48,21 +47,21 @@ def prepare_models(model_name: str):
     }
 
 
-def normalize_tags(tokenizer: PreTrainedTokenizerBase, tags: str):
-    """Just remove unk tokens."""
-    return ", ".join(
-        tokenizer.batch_decode(
-            [
-                token
-                for token in tokenizer.encode_plus(
-                    tags.strip(),
-                    return_tensors="pt",
-                ).input_ids[0]
-                if int(token) != tokenizer.unk_token_id
-            ],
-            skip_special_tokens=True,
-        )
-    )
+# def normalize_tags(tokenizer: PreTrainedTokenizerBase, tags: str):
+#     """Just remove unk tokens."""
+#     return ", ".join(
+#         tokenizer.batch_decode(
+#             [
+#                 token
+#                 for token in tokenizer.encode_plus(
+#                     tags.strip(),
+#                     return_tensors="pt",
+#                 ).input_ids[0]
+#                 if int(token) != tokenizer.unk_token_id
+#             ],
+#             skip_special_tokens=True,
+#         )
+#     )
 
 
 def compose_prompt(
@@ -88,46 +87,28 @@ def compose_prompt(
 @torch.no_grad()
 @spaces.GPU(duration=5)
 def generate_tags(
-    model,
-    tokenizer: PreTrainedTokenizerBase,
+    model: V2Model,
+    tokenizer: DartTokenizer,
     prompt: str,
 ):
-    print(  # debug
-        tokenizer.tokenize(
-            prompt,
-            add_special_tokens=False,
-        )
-    )
-    input_ids = tokenizer.encode_plus(prompt, return_tensors="pt").input_ids
     output = model.generate(
-        input_ids.to(model.device),
-        do_sample=True,
-        temperature=1,
-        top_p=0.9,
-        top_k=100,
-        num_beams=1,
-        num_return_sequences=1,
-        max_length=256,
+        get_generation_config(
+            prompt,
+            tokenizer=tokenizer,
+            temperature=1,
+            top_p=0.9,
+            top_k=100,
+            max_new_tokens=256,
+        ),
     )
 
-    # remove input tokens
-    pure_output_ids = output[0][len(input_ids[0]) :]
-
-    return ", ".join(
-        [
-            token
-            for token in tokenizer.batch_decode(
-                pure_output_ids, skip_special_tokens=True
-            )
-            if token.strip() != ""
-        ]
-    )
+    return output
 
 
 class V2UI:
     model_name: str | None = None
-    model: AutoModelForCausalLM
-    tokenizer: PreTrainedTokenizerBase
+    model: V2Model
+    tokenizer: DartTokenizer
 
     input_components: list[Component] = []
     generate_btn: gr.Button
@@ -139,25 +120,25 @@ class V2UI:
         character_tags: str,
         general_tags: str,
         rating_option: str,
-        # aspect_ratio_option: str,
+        aspect_ratio_option: str,
         length_option: str,
         identity_option: str,
-        image_size: str,  # this is from image generation config
+        # image_size: str,  # this is from image generation config
         *args,
     ) -> UpsamplingOutput:
         if self.model_name is None or self.model_name != model_name:
-            models = prepare_models(ALL_MODELS[model_name]["repo"])
+            models = prepare_models(ALL_MODELS[model_name])
             self.model = models["model"]
             self.tokenizer = models["tokenizer"]
             self.model_name = model_name
 
         # normalize tags
-        copyright_tags = normalize_tags(self.tokenizer, copyright_tags)
-        character_tags = normalize_tags(self.tokenizer, character_tags)
-        general_tags = normalize_tags(self.tokenizer, general_tags)
+        # copyright_tags = normalize_tags(self.tokenizer, copyright_tags)
+        # character_tags = normalize_tags(self.tokenizer, character_tags)
+        # general_tags = normalize_tags(self.tokenizer, general_tags)
 
         rating_tag = RATING_OPTIONS[rating_option]
-        aspect_ratio_tag = IMAGE_SIZE_OPTIONS[image_size]
+        aspect_ratio_tag = ASPECT_RATIO_OPTIONS[aspect_ratio_option]
         length_tag = LENGTH_OPTIONS[length_option]
         identity_tag = IDENTITY_OPTIONS[identity_option]
 
@@ -212,11 +193,11 @@ class V2UI:
             choices=list(RATING_OPTIONS.keys()),
             value="general",
         )
-        # input_aspect_ratio = gr.Radio(
-        #     label="Aspect ratio",
-        #     choices=["ultra_wide", "wide", "square", "tall", "ultra_tall"],
-        #     value="tall",
-        # )
+        input_aspect_ratio = gr.Radio(
+            label="Aspect ratio",
+            choices=["ultra_wide", "wide", "square", "tall", "ultra_tall"],
+            value="tall",
+        )
         input_length = gr.Radio(
             label="Length",
             choices=list(LENGTH_OPTIONS.keys()),
@@ -242,7 +223,7 @@ class V2UI:
             input_character,
             input_general,
             input_rating,
-            # input_aspect_ratio,
+            input_aspect_ratio,
             input_length,
             input_identity,
         ]

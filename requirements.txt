@@ -4,3 +4,4 @@ transformers==4.38.2
 optimum[onnxruntime]==1.19.1
 diffusers==0.27.2
 spaces==0.26.2
+git+https://github.com/p1atdev/dartrs.git@33cdcfe77f236ba286ad60e10db8a5650e150fd2
