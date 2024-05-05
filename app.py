@@ -100,6 +100,8 @@ def main():
                 v2.ui()
 
             with gr.Column():
+                generate_btn = gr.Button(value="Generate tags", variant="primary")
+
                 with gr.Group():
                     output_text = gr.TextArea(label="Output tags", interactive=False)
                     copy_btn = gr.Button(
@@ -225,7 +227,7 @@ def main():
                     ],
                 )
 
-        v2.get_generate_btn().click(
+        generate_btn.click(
             parse_upsampling_output(v2.on_generate),
             inputs=[
                 *v2.get_inputs(),

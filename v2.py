@@ -210,8 +210,6 @@ class V2UI:
             value=list(ALL_MODELS.keys())[0],
         )
 
-        self.generate_btn = gr.Button(value="Generate", variant="primary")
-
         self.input_components = [
             model_name,
             input_copyright,
@@ -223,9 +221,6 @@ class V2UI:
             input_identity,
             input_ban_tags,
         ]
-
-    def get_generate_btn(self) -> gr.Button:
-        return self.generate_btn
 
     def get_inputs(self) -> list[Component]:
         return self.input_components
