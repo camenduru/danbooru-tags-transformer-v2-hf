@@ -186,13 +186,13 @@ class V2UI:
         )
         input_length = gr.Radio(
             label="Length",
-            info="How long the total tags should be.",
+            info="The total length of the tags.",
             choices=list(LENGTH_OPTIONS.keys()),
             value="long",
         )
         input_identity = gr.Radio(
             label="Keep identity",
-            info="How strict to keep the identity of the character or subject.",
+            info="How strictly to keep the identity of the character or subject.",
             choices=list(IDENTITY_OPTIONS.keys()),
             value="none",
         )
