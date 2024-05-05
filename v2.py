@@ -192,7 +192,7 @@ class V2UI:
         )
         input_identity = gr.Radio(
             label="Keep identity",
-            info="How strictly to keep the identity of the character or subject.",
+            info="How strictly to keep the identity of the character or subject. If you specify the detail of subject in the prompt, you should choose `strict`. Otherwise, choose `none` or `lax`. `none` is very creative but sometimes ignores the input prompt.",
             choices=list(IDENTITY_OPTIONS.keys()),
             value="none",
         )
