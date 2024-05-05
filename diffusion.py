@@ -24,6 +24,23 @@ from utils import NEGATIVE_PROMPT, IMAGE_SIZE_OPTIONS, QUALITY_TAGS, IMAGE_SIZES
 
 
 device = "cuda"
+model_name: str = "cagliostrolab/animagine-xl-3.1"
+pipe = StableDiffusionXLPipeline.from_pretrained(
+    model_name,
+    torch_dtype=torch.bfloat16,
+    use_safetensors=True,
+    add_watermarker=False,
+    custom_pipeline="lpw_stable_diffusion_xl",
+)
+pipe.scheduler = EulerAncestralDiscreteScheduler.from_pretrained(
+    model_name,
+    subfolder="scheduler",
+)
+
+# sdpa
+pipe.unet.set_attn_processor(AttnProcessor2_0())
+
+pipe.to(device)
 
 
 def image_generation_config_ui():
@@ -75,25 +92,10 @@ def image_generation_config_ui():
 
 
 class ImageGenerator:
-    pipe: StableDiffusionXLPipeline
+    # pipe: StableDiffusionXLPipeline
 
     def __init__(self, model_name: str = "cagliostrolab/animagine-xl-3.1"):
-        self.pipe = StableDiffusionXLPipeline.from_pretrained(
-            model_name,
-            torch_dtype=torch.bfloat16,
-            use_safetensors=True,
-            add_watermarker=False,
-            custom_pipeline="lpw_stable_diffusion_xl",
-        )
-        self.pipe.scheduler = EulerAncestralDiscreteScheduler.from_pretrained(
-            model_name,
-            subfolder="scheduler",
-        )
-
-        # sdpa
-        self.pipe.unet.set_attn_processor(AttnProcessor2_0())
-
-        self.pipe.to(device)
+        pass
 
     @spaces.GPU()
     def generate(
@@ -116,7 +118,7 @@ class ImageGenerator:
         print("num_inference_steps", num_inference_steps)
         print("guidance_scale", guidance_scale)
 
-        return self.pipe(
+        return pipe(
             prompt=prompt,
             negative_prompt=negative_prompt,
             height=height,
