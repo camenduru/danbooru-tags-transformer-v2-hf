@@ -74,37 +74,6 @@ def image_generation_config_ui():
     ]
 
 
-@spaces.GPU(duration=30)
-def generate(
-    pipe,
-    prompt: str,
-    image_size: str = "768x1344",
-    quality_tags: str = QUALITY_TAGS["default"],  # Light v3.1
-    negative_prompt: str = NEGATIVE_PROMPT["default"],  # Light v3.1
-    num_inference_steps: int = 25,
-    guidance_scale: float = 7.0,
-) -> Image.Image:
-    width, height = IMAGE_SIZES[image_size]
-
-    prompt = ", ".join([prompt, quality_tags])
-
-    print("prompt", prompt)
-    print("negative_prompt", negative_prompt)
-    print("height", height)
-    print("width", width)
-    print("num_inference_steps", num_inference_steps)
-    print("guidance_scale", guidance_scale)
-
-    return pipe(
-        prompt=prompt,
-        negative_prompt=negative_prompt,
-        height=height,
-        width=width,
-        num_inference_steps=num_inference_steps,
-        guidance_scale=guidance_scale,
-    ).images
-
-
 class ImageGenerator:
     pipe: StableDiffusionXLPipeline
 
@@ -126,10 +95,32 @@ class ImageGenerator:
 
         self.pipe.to(device)
 
-        try:
-            self.pipe = torch.compile(self.pipe)
-        except Exception as e:
-            print("torch.compile is not supported on this system")
+    @spaces.GPU(duration=30)
+    def generate(
+        self,
+        prompt: str,
+        image_size: str = "768x1344",
+        quality_tags: str = QUALITY_TAGS["default"],  # Light v3.1
+        negative_prompt: str = NEGATIVE_PROMPT["default"],  # Light v3.1
+        num_inference_steps: int = 25,
+        guidance_scale: float = 7.0,
+    ) -> Image.Image:
+        width, height = IMAGE_SIZES[image_size]
 
-    def generate(self, *args):
-        return generate(self.pipe, *args)
+        prompt = ", ".join([prompt, quality_tags])
+
+        print("prompt", prompt)
+        print("negative_prompt", negative_prompt)
+        print("height", height)
+        print("width", width)
+        print("num_inference_steps", num_inference_steps)
+        print("guidance_scale", guidance_scale)
+
+        return self.pipe(
+            prompt=prompt,
+            negative_prompt=negative_prompt,
+            height=height,
+            width=width,
+            num_inference_steps=num_inference_steps,
+            guidance_scale=guidance_scale,
+        ).images
