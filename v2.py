@@ -1,4 +1,5 @@
 import time
+import os
 
 import torch
 
@@ -26,6 +27,8 @@ except ImportError:
 from output import UpsamplingOutput
 from utils import ASPECT_RATIO_OPTIONS, RATING_OPTIONS, LENGTH_OPTIONS, IDENTITY_OPTIONS
 
+HF_TOKEN = os.getenv("HF_TOKEN", None)
+
 ALL_MODELS = {
     "dart-v2-mixtral-160m-sft-6": {
         "repo": "p1atdev/dart-v2-mixtral-160m-sft-6",
@@ -42,8 +45,8 @@ ALL_MODELS = {
 
 def prepare_models(model_config: dict):
     model_name = model_config["repo"]
-    tokenizer = DartTokenizer.from_pretrained(model_name)
-    model = model_config["class"].from_pretrained(model_name)
+    tokenizer = DartTokenizer.from_pretrained(model_name, auth_token=HF_TOKEN)
+    model = model_config["class"].from_pretrained(model_name, auth_token=HF_TOKEN)
 
     return {
         "tokenizer": tokenizer,
@@ -74,6 +77,7 @@ def generate_tags(
     model: V2Model,
     tokenizer: DartTokenizer,
     prompt: str,
+    ban_token_ids: list[int],
 ):
     output = model.generate(
         get_generation_config(
@@ -83,6 +87,7 @@ def generate_tags(
             top_p=0.9,
             top_k=100,
             max_new_tokens=256,
+            ban_token_ids=ban_token_ids,
         ),
     )
 
@@ -107,7 +112,7 @@ class V2UI:
         aspect_ratio_option: str,
         length_option: str,
         identity_option: str,
-        # image_size: str,  # this is from image generation config
+        ban_tags: str,
         *args,
     ) -> UpsamplingOutput:
         if self.model_name is None or self.model_name != model_name:
@@ -125,6 +130,7 @@ class V2UI:
         aspect_ratio_tag = ASPECT_RATIO_OPTIONS[aspect_ratio_option]
         length_tag = LENGTH_OPTIONS[length_option]
         identity_tag = IDENTITY_OPTIONS[identity_option]
+        ban_token_ids = self.tokenizer.encode(ban_tags.strip())
 
         prompt = compose_prompt(
             prompt=general_tags,
@@ -141,6 +147,7 @@ class V2UI:
             self.model,
             self.tokenizer,
             prompt,
+            ban_token_ids,
         )
         elapsed_time = time.time() - start
 
@@ -193,6 +200,12 @@ class V2UI:
             value="none",
         )
 
+        with gr.Accordion(label="Advanced options", open=False):
+            input_ban_tags = gr.Textbox(
+                label="Ban tags",
+                placeholder="alternate costumen, ...",
+            )
+
         model_name = gr.Dropdown(
             label="Model",
             choices=list(ALL_MODELS.keys()),
@@ -210,6 +223,7 @@ class V2UI:
             input_aspect_ratio,
             input_length,
             input_identity,
+            input_ban_tags,
         ]
 
     def get_generate_btn(self) -> gr.Button:
