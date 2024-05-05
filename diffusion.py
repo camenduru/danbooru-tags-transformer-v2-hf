@@ -94,10 +94,10 @@ def image_generation_config_ui():
 class ImageGenerator:
     # pipe: StableDiffusionXLPipeline
 
-    def __init__(self, model_name: str = "cagliostrolab/animagine-xl-3.1"):
+    def __init__(self):
         pass
 
-    @spaces.GPU()
+    @spaces.GPU(duration=30)
     def generate(
         self,
         prompt: str,
