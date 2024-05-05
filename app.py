@@ -9,6 +9,16 @@ from output import UpsamplingOutput
 from utils import QUALITY_TAGS, NEGATIVE_PROMPT, IMAGE_SIZE_OPTIONS, PEOPLE_TAGS
 
 
+NORMALIZE_RATING_TAG = {
+    "<|rating:sfw|>": "",
+    "<|rating:general|>": "",
+    "<|rating:sensitive|>": "sensitive",
+    "<|rating:nsfw|>": "nsfw",
+    "<|rating:questionable|>": "nsfw",
+    "<|rating:explicit|>": "nsfw, explicit",
+}
+
+
 def animagine_xl_v3_1(output: UpsamplingOutput):
     # separate people tags (e.g. 1girl)
     people_tags = []
@@ -29,11 +39,7 @@ def animagine_xl_v3_1(output: UpsamplingOutput):
                 output.copyright_tags,
                 *other_general_tags,
                 output.upsampled_tags,
-                (
-                    output.rating_tag
-                    if output.rating_tag not in ["<|rating:sfw|>", "<|rating:general|>"]
-                    else ""
-                ),
+                NORMALIZE_RATING_TAG[output.rating_tag],
             ]
             if part.strip() != ""
         ]

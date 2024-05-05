@@ -2,7 +2,11 @@ import time
 
 import torch
 
-from dartrs.v2 import V2Model, MixtralModel
+from dartrs.v2 import (
+    V2Model,
+    MixtralModel,
+    compose_prompt,
+)
 from dartrs.dartrs import DartTokenizer
 from dartrs.utils import get_generation_config
 
@@ -64,26 +68,6 @@ def prepare_models(model_config: dict):
 #     )
 
 
-def compose_prompt(
-    copyright: str = "",
-    character: str = "",
-    general: str = "",
-    rating: str = "<|rating:sfw|>",
-    aspect_ratio: str = "<|aspect_ratio:tall|>",
-    length: str = "<|length:long|>",
-    identity: str = "<|identity:none|>",
-):
-    prompt = (
-        f"<|bos|>"
-        f"<copyright>{copyright.strip()}</copyright>"
-        f"<character>{character.strip()}</character>"
-        f"{rating}{aspect_ratio}{length}"
-        f"<general>{general.strip()}{identity}<|input_end|>"
-    )
-
-    return prompt
-
-
 @torch.no_grad()
 @spaces.GPU(duration=5)
 def generate_tags(
@@ -143,9 +127,9 @@ class V2UI:
         identity_tag = IDENTITY_OPTIONS[identity_option]
 
         prompt = compose_prompt(
+            prompt=general_tags,
             copyright=copyright_tags,
             character=character_tags,
-            general=general_tags,
             rating=rating_tag,
             aspect_ratio=aspect_ratio_tag,
             length=length_tag,
@@ -185,7 +169,7 @@ class V2UI:
             label="General tags",
             lines=4,
             placeholder="1girl, ...",
-            value="1girl",
+            value="1girl, solo",
         )
 
         input_rating = gr.Radio(

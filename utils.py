@@ -1,3 +1,5 @@
+from dartrs.v2 import AspectRatioTag, LengthTag, RatingTag, IdentityTag
+
 # from https://huggingface.co/spaces/cagliostrolab/animagine-xl-3.1/blob/main/config.py
 QUALITY_TAGS = {
     "default": "(masterpiece), best quality, very aesthetic, perfect face",
@@ -22,14 +24,14 @@ IMAGE_SIZES = {
     "640x1536": (640, 1536),
 }
 
-ASPECT_RATIO_OPTIONS = {
+ASPECT_RATIO_OPTIONS: dict[str, AspectRatioTag] = {
     "ultra_wide": "<|aspect_ratio:ultra_wide|>",
     "wide": "<|aspect_ratio:wide|>",
     "square": "<|aspect_ratio:square|>",
     "tall": "<|aspect_ratio:tall|>",
     "ultra_tall": "<|aspect_ratio:ultra_tall|>",
 }
-RATING_OPTIONS = {
+RATING_OPTIONS: dict[str, RatingTag] = {
     "sfw": "<|rating:sfw|>",
     "general": "<|rating:general|>",
     "sensitive": "<|rating:sensitive|>",
@@ -37,14 +39,14 @@ RATING_OPTIONS = {
     "questionable": "<|rating:questionable|>",
     "explicit": "<|rating:explicit|>",
 }
-LENGTH_OPTIONS = {
+LENGTH_OPTIONS: dict[str, LengthTag] = {
     "very_short": "<|length:very_short|>",
     "short": "<|length:short|>",
     "medium": "<|length:medium|>",
     "long": "<|length:long|>",
     "very_long": "<|length:very_long|>",
 }
-IDENTITY_OPTIONS = {
+IDENTITY_OPTIONS: dict[str, IdentityTag] = {
     "none": "<|identity:none|>",
     "lax": "<|identity:lax|>",
     "strict": "<|identity:strict|>",
