@@ -100,7 +100,6 @@ class ImageGenerator:
         except Exception as e:
             print("torch.compile is not supported on this system")
 
-    @torch.no_grad()
     @spaces.GPU(duration=30)
     def generate(
         self,
