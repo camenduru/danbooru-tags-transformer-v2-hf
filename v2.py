@@ -67,7 +67,6 @@ def prepare_models(model_config: dict):
 
 
 @torch.no_grad()
-@spaces.GPU(duration=5)
 def generate_tags(
     model: V2Model,
     tokenizer: DartTokenizer,
