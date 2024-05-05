@@ -136,6 +136,7 @@ def main():
                             "tall",
                             "long",
                             "none",
+                            "768x1344",
                         ],
                         [
                             "original",
@@ -145,6 +146,7 @@ def main():
                             "ultra_wide",
                             "long",
                             "lax",
+                            "1536x640",
                         ],
                         [
                             "",
@@ -154,6 +156,7 @@ def main():
                             "tall",
                             "very_long",
                             "lax",
+                            "768x1344",
                         ],
                         [
                             "original",
@@ -163,6 +166,7 @@ def main():
                             "square",
                             "medium",
                             "none",
+                            "1024x1024",
                         ],
                         [
                             "",
@@ -172,6 +176,7 @@ def main():
                             "ultra_wide",
                             "medium",
                             "lax",
+                            "1536x640",
                         ],
                         [
                             "sousou no frieren",
@@ -181,6 +186,7 @@ def main():
                             "tall",
                             "long",
                             "lax",
+                            "768x1344",
                         ],
                         [
                             "honkai: star rail",
@@ -190,6 +196,7 @@ def main():
                             "tall",
                             "medium",
                             "lax",
+                            "768x1344",
                         ],
                         [
                             "honkai: star rail",
@@ -199,6 +206,7 @@ def main():
                             "tall",
                             "long",
                             "lax",
+                            "768x1344",
                         ],
                         [
                             "chuunibyou demo koi ga shitai!",
@@ -208,10 +216,12 @@ def main():
                             "ultra_tall",
                             "medium",
                             "lax",
+                            "640x1536",
                         ],
                     ],
                     inputs=[
                         *v2.get_inputs()[1:8],
+                        image_generation_config_components[0],  # image_size
                     ],
                 )
 
