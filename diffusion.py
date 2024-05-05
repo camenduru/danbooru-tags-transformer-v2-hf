@@ -80,7 +80,7 @@ class ImageGenerator:
     def __init__(self, model_name: str = "cagliostrolab/animagine-xl-3.1"):
         self.pipe = StableDiffusionXLPipeline.from_pretrained(
             model_name,
-            torch_dtype=torch.float16,
+            torch_dtype=torch.bfloat16,
             use_safetensors=True,
             add_watermarker=False,
             custom_pipeline="lpw_stable_diffusion_xl",
