@@ -23,7 +23,7 @@ import gradio as gr
 from utils import NEGATIVE_PROMPT, IMAGE_SIZE_OPTIONS, QUALITY_TAGS, IMAGE_SIZES
 
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = "cuda"
 
 
 def image_generation_config_ui():
