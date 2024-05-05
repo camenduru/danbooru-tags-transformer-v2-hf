@@ -95,7 +95,7 @@ class ImageGenerator:
 
         self.pipe.to(device)
 
-    @spaces.GPU(duration=30)
+    @spaces.GPU()
     def generate(
         self,
         prompt: str,
