@@ -30,11 +30,6 @@ from utils import ASPECT_RATIO_OPTIONS, RATING_OPTIONS, LENGTH_OPTIONS, IDENTITY
 HF_TOKEN = os.getenv("HF_TOKEN", None)
 
 ALL_MODELS = {
-    "dart-v2-mixtral-160m-sft-6": {
-        "repo": "p1atdev/dart-v2-mixtral-160m-sft-6",
-        "type": "sft",
-        "class": MixtralModel,
-    },
     "dart-v2-mixtral-160m-sft-8": {
         "repo": "p1atdev/dart-v2-mixtral-160m-sft-8",
         "type": "sft",

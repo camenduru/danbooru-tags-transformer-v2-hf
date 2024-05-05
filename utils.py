@@ -1,3 +1,4 @@
+import gradio as gr
 from dartrs.v2 import AspectRatioTag, LengthTag, RatingTag, IdentityTag
 
 # from https://huggingface.co/spaces/cagliostrolab/animagine-xl-3.1/blob/main/config.py
@@ -59,3 +60,17 @@ PEOPLE_TAGS = [
     *[f"6+{x}s" for x in ["girl", "boy", "other"]],
     "no humans",
 ]
+
+
+# ref: https://qiita.com/tregu148/items/fccccbbc47d966dd2fc2
+def gradio_copy_text(_text: None):
+    gr.Info("Copied!")
+
+
+COPY_ACTION_JS = """\
+(inputs, _outputs) => {
+  // inputs is the string value of the input_text
+  if (inputs.trim() !== "") {
+    navigator.clipboard.writeText(inputs);
+  }
+}"""

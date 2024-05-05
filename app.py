@@ -4,9 +4,13 @@ from PIL import Image
 import gradio as gr
 
 from v2 import V2UI
-from diffusion import ImageGenerator
+from diffusion import ImageGenerator, image_generation_config_ui
 from output import UpsamplingOutput
-from utils import QUALITY_TAGS, NEGATIVE_PROMPT, IMAGE_SIZE_OPTIONS, PEOPLE_TAGS
+from utils import (
+    PEOPLE_TAGS,
+    gradio_copy_text,
+    COPY_ACTION_JS,
+)
 
 
 NORMALIZE_RATING_TAG = {
@@ -53,11 +57,7 @@ def elapsed_time_format(elapsed_time: float) -> str:
 def parse_upsampling_output(
     upsampler: Callable[..., UpsamplingOutput],
 ):
-    def _parse_upsampling_output(*args) -> tuple[
-        str,
-        str,
-        dict,
-    ]:
+    def _parse_upsampling_output(*args) -> tuple[str, str, dict, dict]:
         output = upsampler(*args)
 
         print(output)
@@ -68,52 +68,12 @@ def parse_upsampling_output(
             gr.update(
                 interactive=True,
             ),
+            gr.update(
+                interactive=True,
+            ),
         )
 
     return _parse_upsampling_output
-
-
-def image_generation_config_ui():
-    with gr.Accordion(label="Image generation config", open=False) as accordion:
-        image_size = gr.Radio(
-            label="Image size",
-            choices=list(IMAGE_SIZE_OPTIONS.keys()),
-            value=list(IMAGE_SIZE_OPTIONS.keys())[3],  # tall
-        )
-
-        quality_tags = gr.Textbox(
-            label="Quality tags",
-            placeholder=QUALITY_TAGS["default"],
-            value=QUALITY_TAGS["default"],
-        )
-        negative_prompt = gr.Textbox(
-            label="Negative prompt",
-            placeholder=NEGATIVE_PROMPT["default"],
-            value=NEGATIVE_PROMPT["default"],
-        )
-
-        num_inference_steps = gr.Slider(
-            label="Num inference steps",
-            minimum=20,
-            maximum=30,
-            step=1,
-            value=25,
-        )
-        guidance_scale = gr.Slider(
-            label="Guidance scale",
-            minimum=0.0,
-            maximum=10.0,
-            step=0.5,
-            value=7.0,
-        )
-
-    return accordion, [
-        image_size,
-        quality_tags,
-        negative_prompt,
-        num_inference_steps,
-        guidance_scale,
-    ]
 
 
 def description_ui():
@@ -129,7 +89,7 @@ def main():
     v2 = V2UI()
 
     print("Loading diffusion model...")
-    # image_generator = ImageGenerator()
+    image_generator = ImageGenerator()
     print("Loaded.")
 
     with gr.Blocks() as ui:
@@ -140,12 +100,18 @@ def main():
                 v2.ui()
 
             with gr.Column():
-                output_text = gr.TextArea(label="Output tags", interactive=False)
+                with gr.Group():
+                    output_text = gr.TextArea(label="Output tags", interactive=False)
+                    copy_btn = gr.Button(
+                        value="Copy to clipboard",
+                        interactive=False,
+                    )
 
                 elapsed_time_md = gr.Markdown(label="Elapsed time", value="")
 
                 generate_image_btn = gr.Button(
                     value="Generate image with this prompt!",
+                    interactive=False,
                 )
 
                 accordion, image_generation_config_components = (
@@ -153,11 +119,11 @@ def main():
                 )
 
                 output_image = gr.Gallery(
-                    label="Output image",
+                    label="Generated image",
+                    show_label=True,
                     columns=1,
                     preview=True,
-                    show_label=False,
-                    visible=False,
+                    visible=True,
                 )
 
                 gr.Examples(
@@ -218,6 +184,15 @@ def main():
                         ],
                         [
                             "honkai: star rail",
+                            "firefly (honkai: star rail)",
+                            "1girl, solo",
+                            "sfw",
+                            "tall",
+                            "medium",
+                            "lax",
+                        ],
+                        [
+                            "honkai: star rail",
                             "silver wolf (honkai: star rail)",
                             "1girl, solo, annoyed",
                             "sfw",
@@ -245,7 +220,13 @@ def main():
             inputs=[
                 *v2.get_inputs(),
             ],
-            outputs=[output_text, elapsed_time_md, generate_image_btn],
+            outputs=[output_text, elapsed_time_md, copy_btn, generate_image_btn],
+        )
+        copy_btn.click(gradio_copy_text, inputs=[output_text], js=COPY_ACTION_JS)
+        generate_image_btn.click(
+            image_generator.generate,
+            inputs=[output_text, *image_generation_config_components],
+            outputs=[output_image],
         )
 
     ui.launch()
