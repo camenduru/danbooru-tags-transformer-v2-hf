@@ -30,7 +30,7 @@ from utils import ASPECT_RATIO_OPTIONS, RATING_OPTIONS, LENGTH_OPTIONS, IDENTITY
 HF_TOKEN = os.getenv("HF_TOKEN", None)
 
 ALL_MODELS = {
-    "dart-v2-mixtral-160m-sft-8": {
+    "dart-v2-mixtral-160m-sft": {
         "repo": "p1atdev/dart-v2-mixtral-160m-sft-8",
         "type": "sft",
         "class": MixtralModel,
@@ -180,16 +180,19 @@ class V2UI:
         )
         input_aspect_ratio = gr.Radio(
             label="Aspect ratio",
+            info="The aspect ratio of the image.",
             choices=["ultra_wide", "wide", "square", "tall", "ultra_tall"],
             value="tall",
         )
         input_length = gr.Radio(
             label="Length",
+            info="How long the total tags should be.",
             choices=list(LENGTH_OPTIONS.keys()),
             value="long",
         )
         input_identity = gr.Radio(
-            label="Keep identity level",
+            label="Keep identity",
+            info="How strict to keep the identity of the character or subject.",
             choices=list(IDENTITY_OPTIONS.keys()),
             value="none",
         )
@@ -197,6 +200,7 @@ class V2UI:
         with gr.Accordion(label="Advanced options", open=False):
             input_ban_tags = gr.Textbox(
                 label="Ban tags",
+                info="Tags to ban from the output.",
                 placeholder="alternate costumen, ...",
             )
 
