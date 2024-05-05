@@ -4,4 +4,4 @@ transformers==4.38.2
 optimum[onnxruntime]==1.19.1
 diffusers==0.27.2
 spaces==0.26.2
-dartrs==0.1.1
+dartrs==0.1.2
